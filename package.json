@@ -1,6 +1,6 @@
 {
-  "name": "apollo-node-client",
-  "version": "1.4.3",
+  "name": "@def24/apollo-node-client",
+  "version": "1.4.4",
   "description": "Node.js Client for Apollo",
   "author": "zhangxh1023",
   "email": "zhangxh1023@gmail.com",
@@ -21,7 +21,7 @@
     "ctrip apollo client"
   ],
   "scripts": {
-    "build": "tsc --sourceMap false -p tsconfig.json",
+    "build": "tsc",
     "clean": "rm -rf dist coverage",
     "lint": "eslint --ext .ts .",
     "fix": "eslint --fix --ext .ts .",

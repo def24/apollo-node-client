@@ -1,5 +1,5 @@
 node_modules/*
 .vscode/*
 coverage/*
-dist/*
 .DS_Store
+package-lock.json

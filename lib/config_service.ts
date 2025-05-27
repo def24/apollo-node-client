@@ -8,7 +8,7 @@ export class ConfigService {
 
   private readonly configManager: ConfigManager;
 
-  constructor(private readonly options: {
+  constructor(readonly options: {
     configServerUrl: string;
     appId: string;
     clusterName?: string;

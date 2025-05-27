@@ -80,7 +80,7 @@ export class Request {
   }
 
   public static async fetchNotifications(url: string, headers?: HeadersInit): Promise<Notification[] | null> {
-    const response = await fetch(url, { headers, timeout: 70000 });
+    const response = await fetch(url, { headers, signal: AbortSignal.timeout(70000) });
     const status = response.status;
     const text = await response.text();
     if (status === 304) return null;

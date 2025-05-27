@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { EventEmitter } from 'stream';
 import { AuthHeader } from './access';
 import { ConfigOptions } from './types';

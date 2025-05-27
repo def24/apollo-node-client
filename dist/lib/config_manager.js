@@ -1,32 +1,38 @@
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 (function (factory) {
     if (typeof module === "object" && typeof module.exports === "object") {
         var v = factory(require, exports);
         if (v !== undefined) module.exports = v;
     }
     else if (typeof define === "function" && define.amd) {
-        define(["require", "exports", "./properties_config", "./constants", "./json_config", "./access", "./request", "./plain_config"], factory);
+        define(["require", "exports", "debug", "./properties_config", "./constants", "./json_config", "./access", "./request", "./plain_config"], factory);
     }
 })(function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ConfigManager = void 0;
+    const debug_1 = __importDefault(require("debug"));
     const properties_config_1 = require("./properties_config");
     const constants_1 = require("./constants");
     const json_config_1 = require("./json_config");
     const access_1 = require("./access");
     const request_1 = require("./request");
     const plain_config_1 = require("./plain_config");
+    const logger = (0, debug_1.default)('apollo-node-client:config_manager');
     class ConfigManager {
         constructor(options) {
             this.options = options;
             this.LONG_POLL_RETRY_TIME = 1000;
-            this.MAX_LONG_POLL_RETRY_TIME = 16000;
+            this.MAX_LONG_POLL_RETRY_TIME = 32000; // 2 factor
             this.MIN_LONG_POLL_RETRY_TIME = 1000;
             this.configsMap = new Map();
             this.configsMapVersion = 0;
             this.options = options;
         }
         getTypeByNamespaceName(namespaceName) {
+            logger('getTypeByNamespaceName namespaceName:', namespaceName);
             for (const key in constants_1.ConfigTypes) {
                 if (namespaceName.endsWith(`.${constants_1.ConfigTypes[key]}`)) {
                     return {
@@ -36,16 +42,18 @@
                     };
                 }
             }
+            // default type is properties
             return { namespaceName, type: constants_1.ConfigTypes.PROPERTIES };
         }
         async getConfig(namespaceName, ip) {
             const type = this.getTypeByNamespaceName(namespaceName);
-            if (!type.namespaceName) {
+            if (!type.namespaceName)
                 throw new Error('namespaceName can not be empty!');
-            }
             const mpKey = this.formatConfigsMapKey(type.namespaceName);
+            logger('getConfig: mpKey', mpKey);
             let config = this.configsMap.get(mpKey);
             if (!config) {
+                logger('getConfig: create config', type);
                 if (type.type == constants_1.ConfigTypes.PROPERTIES) {
                     config = new properties_config_1.PropertiesConfig({
                         ...this.options,
@@ -71,10 +79,13 @@
                 const singleMap = new Map();
                 singleMap.set(key, config);
                 try {
+                    logger(`getConfig:this.updateConfigs`, singleMap);
                     await this.updateConfigs(singleMap);
+                    logger('getConfig: load notifications success');
                 }
                 catch (error) {
-                    console.log('[apollo-node-client] %s - load notifications failed. - %s', new Date(), error);
+                    console.log('[apollo-node-client] %s - getConfig: load notifications failed. - %s', new Date(), error.message);
+                    // throw error;
                 }
                 setImmediate(async () => {
                     await this.startLongPoll(configsMapVersion);
@@ -109,15 +120,18 @@
             // ignore no update
         }
         async startLongPoll(configsMapVersion) {
+            logger('startLongPoll');
             if (configsMapVersion !== this.configsMapVersion) {
                 return;
             }
             try {
+                logger('startLongPoll: update configs', this.configsMap);
                 await this.updateConfigs(this.configsMap);
                 this.LONG_POLL_RETRY_TIME = this.MIN_LONG_POLL_RETRY_TIME;
+                logger('startLongPoll: update configs success');
             }
             catch (error) {
-                console.log('[apollo-node-client] %s - update configs failed, will retry in %s seconds. - %s', new Date(), this.LONG_POLL_RETRY_TIME / 1000, error);
+                console.log('[apollo-node-client] %s - update configs failed, will retry in %s seconds. - %s', new Date(), this.LONG_POLL_RETRY_TIME / 1000, error.message);
                 await this.sleep(this.LONG_POLL_RETRY_TIME);
                 if (this.LONG_POLL_RETRY_TIME < this.MAX_LONG_POLL_RETRY_TIME) {
                     this.LONG_POLL_RETRY_TIME *= 2;

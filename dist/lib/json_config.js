@@ -18,7 +18,10 @@
     class JSONConfig extends config_1.Config {
         constructor(options, ip) {
             super(options, ip);
-            this.configs = Object.create(null);
+            this.configs = JSONConfig.EMPTY_CONFIG;
+        }
+        isInitialized() {
+            return this.configs !== JSONConfig.EMPTY_CONFIG;
         }
         getProperty(key, defaultValue) {
             return this.getPropertyByJSONAndKey(this.configs, key, defaultValue);
@@ -155,5 +158,6 @@
         }
     }
     exports.JSONConfig = JSONConfig;
+    JSONConfig.EMPTY_CONFIG = Object.create(null);
 });
 //# sourceMappingURL=json_config.js.map

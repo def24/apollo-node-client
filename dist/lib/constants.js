@@ -27,12 +27,12 @@
         ConfigTypes["YML"] = "yml";
         ConfigTypes["YAML"] = "yaml";
         ConfigTypes["TXT"] = "txt";
-    })(ConfigTypes = exports.ConfigTypes || (exports.ConfigTypes = {}));
+    })(ConfigTypes || (exports.ConfigTypes = ConfigTypes = {}));
     var PropertyChangeType;
     (function (PropertyChangeType) {
         PropertyChangeType["ADDED"] = "ADDED";
         PropertyChangeType["MODIFIED"] = "MODIFIED";
         PropertyChangeType["DELETED"] = "DELETED";
-    })(PropertyChangeType = exports.PropertyChangeType || (exports.PropertyChangeType = {}));
+    })(PropertyChangeType || (exports.PropertyChangeType = PropertyChangeType = {}));
 });
 //# sourceMappingURL=constants.js.map

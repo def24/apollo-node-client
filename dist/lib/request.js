@@ -59,7 +59,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             return `${url}/notifications/v2?${strParams}`;
         }
         static async fetchNotifications(url, headers) {
-            const response = await (0, node_fetch_1.default)(url, { headers, timeout: 70000 });
+            const response = await (0, node_fetch_1.default)(url, { headers, signal: AbortSignal.timeout(70000) });
             const status = response.status;
             const text = await response.text();
             if (status === 304)

@@ -18,11 +18,15 @@ export type JSONType = {
 export type JSONValueType = JSONBaseType | JSONArrayType | JSONType;
 
 export class JSONConfig extends Config implements ConfigInterface {
-
-  private configs: JSONValueType = Object.create(null);
+  private static readonly EMPTY_CONFIG = Object.create(null);
+  private configs: JSONValueType = JSONConfig.EMPTY_CONFIG;
 
   constructor(options: ConfigOptions, ip?: string) {
     super(options, ip);
+  }
+
+  public isInitialized(): boolean {
+    return this.configs !== JSONConfig.EMPTY_CONFIG;
   }
 
   public getProperty(key: string, defaultValue?: JSONValueType): undefined | JSONValueType {

@@ -10,8 +10,10 @@ export type JSONType = {
 };
 export type JSONValueType = JSONBaseType | JSONArrayType | JSONType;
 export declare class JSONConfig extends Config implements ConfigInterface {
+    private static readonly EMPTY_CONFIG;
     private configs;
     constructor(options: ConfigOptions, ip?: string);
+    isInitialized(): boolean;
     getProperty(key: string, defaultValue?: JSONValueType): undefined | JSONValueType;
     private getPropertyByJSONAndKey;
     private getPropertyByJSONAndKeySlice;

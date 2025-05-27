@@ -1,9 +1,12 @@
+import debug from 'debug'
 import { PropertiesConfig } from './properties_config';
 import { CLUSTER_NAMESPACE_SEPARATOR, ConfigTypes } from './constants';
 import { JSONConfig } from './json_config';
 import { Access, AuthHeader } from './access';
 import { Request } from './request';
 import { PlainConfig } from './plain_config';
+const logger = debug('apollo-node-client:config_manager');
+// logger.enabled = logger.enabled 
 
 export type ConfigManagerOptions = {
   configServerUrl: string;
@@ -21,7 +24,7 @@ export class ConfigManager {
 
   private LONG_POLL_RETRY_TIME = 1000;
 
-  private MAX_LONG_POLL_RETRY_TIME = 16000;
+  private MAX_LONG_POLL_RETRY_TIME = 32000; // 2 factor
 
   private MIN_LONG_POLL_RETRY_TIME = 1000;
 
@@ -34,6 +37,7 @@ export class ConfigManager {
   }
 
   private getTypeByNamespaceName(namespaceName: string): NamespacePair {
+    logger('getTypeByNamespaceName namespaceName:', namespaceName);
     for (const key in ConfigTypes) {
       if (namespaceName.endsWith(`.${ConfigTypes[key]}`)) {
         return {
@@ -46,17 +50,18 @@ export class ConfigManager {
         };
       }
     }
+    // default type is properties
     return { namespaceName, type: ConfigTypes.PROPERTIES };
   }
 
   public async getConfig(namespaceName: string, ip?: string): Promise<PropertiesConfig | JSONConfig | PlainConfig> {
     const type = this.getTypeByNamespaceName(namespaceName);
-    if (!type.namespaceName) {
-      throw new Error('namespaceName can not be empty!');
-    }
+    if (!type.namespaceName) throw new Error('namespaceName can not be empty!');
     const mpKey = this.formatConfigsMapKey(type.namespaceName);
+    logger('getConfig: mpKey', mpKey);
     let config = this.configsMap.get(mpKey);
     if (!config) {
+      logger('getConfig: create config', type);
       if (type.type == ConfigTypes.PROPERTIES) {
         config = new PropertiesConfig({
           ...this.options,
@@ -81,9 +86,12 @@ export class ConfigManager {
       const singleMap = new Map();
       singleMap.set(key, config);
       try {
+        logger(`getConfig:this.updateConfigs`,singleMap );
         await this.updateConfigs(singleMap);
+        logger('getConfig: load notifications success');
       } catch (error) {
-        console.log('[apollo-node-client] %s - load notifications failed. - %s', new Date(), error);
+        console.log('[apollo-node-client] %s - getConfig: load notifications failed. - %s', new Date(), error.message);
+        // throw error;
       }
       setImmediate(async () => {
         await this.startLongPoll(configsMapVersion);
@@ -122,15 +130,18 @@ export class ConfigManager {
   }
 
   private async startLongPoll(configsMapVersion: number): Promise<void> {
+    logger('startLongPoll');
     if (configsMapVersion !== this.configsMapVersion) {
       return;
     }
     try {
+      logger('startLongPoll: update configs', this.configsMap);
       await this.updateConfigs(this.configsMap);
       this.LONG_POLL_RETRY_TIME = this.MIN_LONG_POLL_RETRY_TIME;
+      logger('startLongPoll: update configs success');
     } catch (error) {
       console.log('[apollo-node-client] %s - update configs failed, will retry in %s seconds. - %s',
-        new Date(), this.LONG_POLL_RETRY_TIME / 1000, error);
+        new Date(), this.LONG_POLL_RETRY_TIME / 1000, error.message);
       await this.sleep(this.LONG_POLL_RETRY_TIME);
       if (this.LONG_POLL_RETRY_TIME < this.MAX_LONG_POLL_RETRY_TIME) {
         this.LONG_POLL_RETRY_TIME *= 2;

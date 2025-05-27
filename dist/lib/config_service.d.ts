@@ -2,7 +2,12 @@ import { PropertiesConfig } from './properties_config';
 import { JSONConfig } from './json_config';
 import { PlainConfig } from './plain_config';
 export declare class ConfigService {
-    private readonly options;
+    readonly options: {
+        configServerUrl: string;
+        appId: string;
+        clusterName?: string;
+        secret?: string;
+    };
     private readonly configManager;
     constructor(options: {
         configServerUrl: string;

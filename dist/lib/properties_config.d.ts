@@ -14,7 +14,6 @@ export declare class PropertiesConfig extends Config implements ConfigInterface 
     private setProperty;
     private deleteProperty;
     addChangeListener(fn: (changeEvent: ConfigChangeEvent<string>) => void): PropertiesConfig;
-    addConnectListener(fn: () => void): PropertiesConfig;
     _loadAndUpdateConfig(url: string, headers: AuthHeader | undefined): Promise<void>;
     private diffMap;
     private updateConfigAndCreateChangeEvent;

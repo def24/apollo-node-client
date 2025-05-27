@@ -1,6 +1,6 @@
 {
   "name": "@def24/apollo-node-client",
-  "version": "1.4.4",
+  "version": "1.4.6",
   "description": "Node.js Client for Apollo",
   "author": "zhangxh1023",
   "email": "zhangxh1023@gmail.com",

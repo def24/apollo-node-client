@@ -5,7 +5,7 @@ import { Config } from './config';
 import { ConfigInterface } from './configInterface';
 import { ConfigChange } from './config_change';
 import { ConfigChangeEvent } from './config_change_event';
-import { CHANGE_EVENT_NAME, CONNECT_EVENT_NAME, PropertyChangeType } from './constants';
+import { CHANGE_EVENT_NAME, PropertyChangeType } from './constants';
 import { Request } from './request';
 import { ConfigOptions } from './types';
 const logger = debug('apollo-node-client:properties_config');
@@ -50,11 +50,7 @@ export class PropertiesConfig extends Config implements ConfigInterface {
     return this;
   }
 
-  public addConnectListener(fn: () => void): PropertiesConfig {
-    logger('addConnectListener');
-    this.addListener(CONNECT_EVENT_NAME, fn);
-    return this;
-  }
+
 
   public async _loadAndUpdateConfig(url: string, headers: AuthHeader | undefined): Promise<void> {
     logger('_loadAndUpdateConfig');

@@ -47,11 +47,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
             this.addListener(constants_1.CHANGE_EVENT_NAME, fn);
             return this;
         }
-        addConnectListener(fn) {
-            logger('addConnectListener');
-            this.addListener(constants_1.CONNECT_EVENT_NAME, fn);
-            return this;
-        }
         async _loadAndUpdateConfig(url, headers) {
             logger('_loadAndUpdateConfig');
             const loadConfigResp = await request_1.Request.fetchConfig(url, headers);
